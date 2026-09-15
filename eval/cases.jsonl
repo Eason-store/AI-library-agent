@@ -1,0 +1,17 @@
+{"query": "我想学习机器学习和神经网络", "relevant_ids": ["B006", "B011", "B005"]}
+{"query": "我想找一本教我写程序的入门书", "relevant_ids": ["B004"]}
+{"query": "有没有讲排序、图和动态规划的书", "relevant_ids": ["B009", "B014"]}
+{"query": "我想了解互联网协议和网络层", "relevant_ids": ["B010"]}
+{"query": "我想找和宇宙、黑洞、时间有关的书", "relevant_ids": ["B012"]}
+{"query": "有没有自然语言处理和语言模型相关的书", "relevant_ids": ["B015"]}
+
+{"query": "有没有适合初学者学代码的书", "relevant_ids": ["B004"]}
+{"query": "我想了解AI是怎么做推理和学习的", "relevant_ids": ["B005", "B011"]}
+{"query": "推荐一本关于神经网络的书", "relevant_ids": ["B006", "B011"]}
+{"query": "我想学习网络通信和互联网工作原理", "relevant_ids": ["B010"]}
+{"query": "有没有关于算法效率和数据结构的书", "relevant_ids": ["B009", "B014"]}
+{"query": "我想读一部关于外星文明和宇宙的小说", "relevant_ids": ["B001", "B002", "B007"]}
+
+{"query": "我想了解文本分类和语义分析", "relevant_ids": ["B015"]}
+{"query": "有没有讲黑洞和宇宙起源的科普书", "relevant_ids": ["B012"]}
+{"query": "我想读一本关于人生和命运的文学作品", "relevant_ids": ["B003", "B008", "B013"]}

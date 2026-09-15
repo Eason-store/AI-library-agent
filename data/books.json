@@ -1,0 +1,107 @@
+[
+  {
+    "book_id": "B001",
+    "title": "三体",
+    "author": "刘慈欣",
+    "category": "科幻",
+    "description": "一部关于外星文明、人类未来和宇宙社会的科幻小说。"
+  },
+  {
+    "book_id": "B002",
+    "title": "流浪地球",
+    "author": "刘慈欣",
+    "category": "科幻",
+    "description": "人类为了逃离太阳危机，尝试推动地球离开太阳系。"
+  },
+  {
+    "book_id": "B003",
+    "title": "活着",
+    "author": "余华",
+    "category": "文学",
+    "description": "讲述普通人在时代变化中经历家庭、生活和命运的故事。"
+  },
+  {
+    "book_id": "B004",
+    "title": "Python编程：从入门到实践",
+    "author": "Eric Matthes",
+    "category": "计算机",
+    "description": "适合初学者学习 Python 编程基础、项目开发和实践。"
+  },
+  {
+    "book_id": "B005",
+    "title": "人工智能：一种现代方法",
+    "author": "Stuart Russell",
+    "category": "计算机",
+    "description": "系统介绍人工智能、搜索、机器学习、推理和智能体。"
+  },
+  {
+    "book_id": "B006",
+    "title": "深度学习",
+    "author": "Ian Goodfellow",
+    "category": "计算机",
+    "description": "介绍神经网络、深度学习方法以及机器学习基础。"
+  },
+  {
+    "book_id": "B007",
+    "title": "银河系漫游指南",
+    "author": "Douglas Adams",
+    "category": "科幻",
+    "description": "一部幽默风格的太空旅行和科幻冒险小说。"
+  },
+  {
+    "book_id": "B008",
+    "title": "百年孤独",
+    "author": "Gabriel Garcia Marquez",
+    "category": "文学",
+    "description": "讲述布恩迪亚家族多代人的历史、孤独与命运。"
+  },
+{
+  "book_id": "B009",
+  "title": "算法导论",
+  "author": "Thomas H. Cormen",
+  "category": "计算机",
+  "description": "系统介绍算法设计、排序、图算法、动态规划和复杂度分析。"
+},
+{
+  "book_id": "B010",
+  "title": "计算机网络：自顶向下方法",
+  "author": "James Kurose",
+  "category": "计算机",
+  "description": "介绍互联网协议、网络层、传输层、应用层和计算机网络原理。"
+},
+{
+  "book_id": "B011",
+  "title": "机器学习",
+  "author": "周志华",
+  "category": "计算机",
+  "description": "介绍监督学习、分类、回归、决策树、神经网络和机器学习基础。"
+},
+{
+  "book_id": "B012",
+  "title": "时间简史",
+  "author": "Stephen Hawking",
+  "category": "科普",
+  "description": "介绍宇宙起源、黑洞、时间、空间以及现代物理学中的重要问题。"
+},
+{
+  "book_id": "B013",
+  "title": "月亮与六便士",
+  "author": "W. Somerset Maugham",
+  "category": "文学",
+  "description": "讲述一个人放弃原有生活追求艺术理想的故事。"
+},
+{
+  "book_id": "B014",
+  "title": "数据结构与算法分析",
+  "author": "Mark Allen Weiss",
+  "category": "计算机",
+  "description": "介绍数据结构、树、图、排序、查找和算法效率分析。"
+},
+{
+  "book_id": "B015",
+  "title": "自然语言处理综论",
+  "author": "Daniel Jurafsky",
+  "category": "计算机",
+  "description": "介绍自然语言处理、语言模型、文本分类、语义分析和机器学习方法。"
+} 
+]
