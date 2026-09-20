@@ -1,21 +1,25 @@
-#在 retriever.py 加载向量模型
-import numpy as np
+from lms.models import book_rows
+
+import chromadb
 from sentence_transformers import SentenceTransformer
 #把 BM25 改成中文分词版，jieba
 import jieba
 #BM25
-import json
+# import json
 from rank_bm25 import BM25Okapi
 
 
 
 
+# def load_books():
+#     with open("data/books.json", "r", encoding="utf-8") as file:
+#         return json.load(file)
 def load_books():
-    with open("data/books.json", "r", encoding="utf-8") as file:
-        return json.load(file)
+    #书从数据库来（文档 3.1 的 books 表）；返回结构仍保持 list[dict]，下面四个函数一行都不用改
+    return book_rows()
 
 
-
+# 稀疏部分（BM25）：只对标题、作者做词袋检索（文档 3.3）
 def build_documents(books):
     documents = []
 
@@ -24,10 +28,6 @@ def build_documents(books):
             book["title"]
             + " "
             + book["author"]
-            + " "
-            + book["category"]
-            + " "
-            + book["description"]
         )
 
         documents.append(text)
@@ -98,60 +98,68 @@ model = SentenceTransformer(
 
 
 
-#向量查询，语义强，精准关键词可能弱
+#向量查询：改成查 Chroma，语义强，精准关键词可能弱（文档 3.3）
 def vector_search(query, top_k=3):
     books = load_books()
 
-    book_embeddings = np.load(
-        "data/book_embeddings.npy"
+    book_map = {
+        book["book_id"]: book
+        for book in books
+    }
+
+    # 1. 连接 build_index 建好的 Chroma 数据库
+    client = chromadb.PersistentClient(
+        path="data/chroma_db"
     )
 
+    # 2. 拿到 books collection
+    collection = client.get_collection(
+        name="books"
+    )
 
-
-    #把用户 Query 也变成向量
+    # 3. 把用户 Query 也变成向量，必须和 build_index.py 用同一个模型
     query_embedding = model.encode(
         [query],
         normalize_embeddings=True
     )[0]
 
-
-
-    #对向量进行归一化处理，确保每个向量的长度为 1，这样可以更准确地计算相似度
-    book_embeddings = book_embeddings / np.linalg.norm(
-        book_embeddings,
-        axis=1,
-        keepdims=True
+    # 4. 在 Chroma 里查最相似的书
+    chroma_results = collection.query(
+        query_embeddings=[query_embedding.tolist()],
+        n_results=top_k
     )
-
-
-
-    #计算每本书的向量与用户 Query 的向量的相似度
-    scores = book_embeddings @ query_embedding
-    
-    ranked_indices = np.argsort(scores)[::-1]
 
     results = []
 
-    for index in ranked_indices[:top_k]:
+    # 5. Chroma 给的是 cosine 距离（1 - 相似度），换算回相似度当分数
+    for book_id, distance in zip(
+        chroma_results["ids"][0],
+        chroma_results["distances"][0]
+    ):
         results.append({
-            "book": books[index],
-            "score": float(scores[index])
+            "book": book_map[book_id],
+            "score": 1 - float(distance)
         })
 
     return results
 
 
 
-#混合检索，结合 BM25 和向量搜索的结果
+#混合检索：用 RRF（Reciprocal Rank Fusion）融合两路排名（文档 3.3）
 def hybrid_search(query, top_k=3):
-    #让 BM25 和 Vector 返回更多候选
-    bm25_results = bm25_search(query, top_k=5)
-    vector_results = vector_search(query, top_k=5)
+    #两路各取更多候选，让融合有排名信息可用
+    candidate_k = 5
 
-    rrf_scores = {}
+    bm25_results = bm25_search(query, top_k=candidate_k)
+    vector_results = vector_search(query, top_k=candidate_k)
+
+    #RRF 只看排名不看原始分数，所以不用处理 BM25 与余弦相似度量纲不同的问题
+    #k = 60 是 RRF 的标准平滑参数
     k = 60
 
-#给 BM25 排名打 RRF 分
+    rrf_scores = {}
+
+    #给 BM25 排名打 RRF 分
     for rank, item in enumerate(bm25_results, start=1):
         book_id = item["book"]["book_id"]
 
@@ -159,8 +167,8 @@ def hybrid_search(query, top_k=3):
             rrf_scores[book_id] = 0
 
         rrf_scores[book_id] += 1 / (k + rank)
-    
-#给向量搜索排名打 RRF 分
+
+    #给向量搜索排名打 RRF 分
     for rank, item in enumerate(vector_results, start=1):
         book_id = item["book"]["book_id"]
 
@@ -169,14 +177,14 @@ def hybrid_search(query, top_k=3):
 
         rrf_scores[book_id] += 1 / (k + rank)
 
-#重新排序
+    #按融合分重新排序
     ranked_book_ids = sorted(
         rrf_scores,
         key=rrf_scores.get,
         reverse=True
     )
-    
-#把 book_id 找回完整书籍信息
+
+    #把 book_id 找回完整书籍信息
     books = load_books()
 
     book_map = {
@@ -189,6 +197,7 @@ def hybrid_search(query, top_k=3):
     for book_id in ranked_book_ids[:top_k]:
         results.append({
             "book": book_map[book_id],
+            #注意：这是 RRF 融合分（量级约 0.016~0.033），不是相似度
             "score": rrf_scores[book_id]
         })
 

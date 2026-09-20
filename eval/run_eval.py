@@ -17,9 +17,19 @@ def load_cases():
             if not line:
                 continue
 
-            cases.append(json.loads(line))
+            # cases.append(json.loads(line))
+            case = json.loads(line)
+
+            #只跑检索类用例（type = retrieval）；以后补的端到端用例（type = e2e）不走这条评测
+            if case.get("type", "retrieval") != "retrieval":
+                continue
+
+            cases.append(case)            
 
     return cases
+
+
+
 
 # 找到的相关书数量
 # ÷
