@@ -5,7 +5,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
 #SQLite 数据库文件放在 lms/ 目录下，第一次建表时自动创建
-DATABASE_URL = "sqlite:///lms/library.db"
+# DATABASE_URL = "sqlite:///lms/library.db"
+
+#SQLite 数据库文件放在 data/ 目录下，和其它数据产物（books.json、chroma_db）放在一起
+DATABASE_URL = "sqlite:///data/lms.sqlite"
 
 #check_same_thread=False：FastAPI 会多线程处理请求，而 SQLite 默认禁止连接跨线程使用
 engine = create_engine(
@@ -51,6 +54,7 @@ class User(Base):
     level: Mapped[str] = mapped_column(String(10), default="普通")
     max_borrow: Mapped[int] = mapped_column(Integer, default=5)
     current_borrow: Mapped[int] = mapped_column(Integer, default=0)
+    password_hash: Mapped[str] = mapped_column(String(200), default="")
 
 
 #文档 3.1：loans 表（借阅记录）
@@ -84,7 +88,7 @@ class Reservation(Base):
 
 
 def init_db():
-    #建表：按上面的模型在 library.db 里创建 4 张表，已经存在就跳过
+    #建表：按上面的模型在 lms.sqlite 里创建 4 张表，已经存在就跳过
     Base.metadata.create_all(engine)
 
 

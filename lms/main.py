@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
 from lms.models import init_db
-from lms.routers import books, loans, reservations, users
+from lms.routers import auth, books, loans, reservations, users
 
 #启动前确保 4 张表存在：library.db 不存在会自动建，已经建过就跳过（幂等）
 init_db()
@@ -16,6 +16,7 @@ app.include_router(books.router)
 app.include_router(users.router)
 app.include_router(loans.router)
 app.include_router(reservations.router)
+app.include_router(auth.router)
 
 @app.get("/health", tags=["ops"], summary="健康检查")
 def health():

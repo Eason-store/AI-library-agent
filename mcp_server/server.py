@@ -1,8 +1,14 @@
+import os
+import sys
 from typing import Annotated
 
 import httpx
 from pydantic import Field
 from mcp.server import MCPServer
+
+#模型已经下载在本地，服务本身不需要联网；不设这个标志的话，
+#每次启动都会去 HuggingFace 检查更新，断网环境下会卡好几分钟
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
 
 #导入 RAG
 from rag.retriever import hybrid_search
@@ -63,52 +69,6 @@ def _call_lms(method, path, json_body=None):
         "status": response.status_code,
         "data": response.json()
     }
-
-
-
-
-# @mcp.tool()
-# def search_books(query: str) -> list[str]:
-#     """Search books by title or author."""
-
-#     books = [
-#         "三体 - 刘慈欣",
-#         "流浪地球 - 刘慈欣",
-#         "活着 - 余华",
-#         "Python编程: 从入门到实践 - Eric Matthes"
-#     ]
-
-#     result = []
-
-#     for book in books:
-#         if query.lower() in book.lower():
-#             result.append(book)
-
-#     return result
-
-# @mcp.tool()
-# def search_books(query: str, top_k: int = 3) -> list[dict]:
-#     """Search books using hybrid retrieval."""
-
-#     results = hybrid_search(
-#         query,
-#         top_k=top_k
-#     )
-
-#     books = []
-
-#     for item in results:
-#         book = item["book"]
-
-#         books.append({
-#             "book_id": book["book_id"],
-#             "title": book["title"],
-#             "author": book["author"],
-#             "category": book["category"],
-#             "score": item["score"]
-#         })
-
-#     return books
 
 
 #文档 3.2：search_books(query, category, top_k) -> list[{book_id, title, author, call_number}]
@@ -275,4 +235,11 @@ def reserve(
 
 
 if __name__ == "__main__":
-    mcp.run() #无参数默认Stdio，本地构建MCP服务器，本地客户端调用
+    #默认 stdio：给本地 MCP 客户端用（agent/loop.py 就是这么起它的）
+    #加 --http：起一个常驻的 HTTP 服务，给 Streamlit 前端用
+    #  （stdio 模式每次都要重启子进程、重载向量模型；HTTP 模式服务常驻，前端只握手一次）
+    if "--http" in sys.argv:
+        #端口特意用 8765：8000 已经被 LMS 后端占了
+        mcp.run("streamable-http", host="127.0.0.1", port=8765)
+    else:
+        mcp.run()

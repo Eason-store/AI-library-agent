@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from lms.models import Loan, User, get_db
+from lms.models import Book, Loan, User, get_db
 from lms.schemas import LoanOut, UserOut
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -38,10 +38,26 @@ def list_user_loans(user_id: str, db: Session = Depends(get_db)):
             }
         )
 
+    #join books 表，把书名一起取出来（借阅列表里显示书名才有意义）
     stmt = (
-        select(Loan)
+        select(Loan, Book.title)
+        .join(Book, Book.book_id == Loan.book_id)
         .where(Loan.user_id == user_id)
         .order_by(Loan.borrowed_at.desc())
     )
 
-    return db.scalars(stmt).all()
+    rows = db.execute(stmt).all()
+
+    return [
+        LoanOut(
+            loan_id=loan.loan_id,
+            user_id=loan.user_id,
+            book_id=loan.book_id,
+            book_title=title,
+            borrowed_at=loan.borrowed_at,
+            due_at=loan.due_at,
+            returned_at=loan.returned_at,
+            renew_count=loan.renew_count
+        )
+        for loan, title in rows
+    ]

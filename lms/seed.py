@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 
 from lms import rules
 from lms.models import Book, Loan, Reservation, SessionLocal, User, init_db
+from lms.auth import hash_password
 
 RANDOM_SEED = 42
 BOOK_TARGET = 500
@@ -236,7 +237,9 @@ def build_users():
             level=level,
             #额度不另写一套数字，直接取 rules.py 的规则，服务和种子共用同一个来源
             max_borrow=rules.max_borrow_for(level),
-            current_borrow=0
+            current_borrow=0,
+            #演示用的统一密码，方便直接用 seed 的读者登录（README 里写明）
+            password_hash=hash_password("123456")
         ))
 
     return users
@@ -304,6 +307,19 @@ def seed_loans(db, books, users, now):
         add_loan(pool[ACTIVE_LOAN_COUNT + 3 + i], users[ACTIVE_LOAN_COUNT + 3 + i], borrowed_at,
                  returned_at=borrowed_at + timedelta(days=20))
 
+    #4) 给评测准备两块"特殊状态"，让预约和异常路径的用例不依赖执行顺序：
+    #   a. 让《算法导论》全部借出（用于测"预约成功"和"没有在架副本"）
+    daolun = next(book for book in books if book.book_id == "B009")
+
+    for i in range(daolun.total_copies):
+        add_loan(daolun, users[45 + i], now - timedelta(days=8 + i))
+
+    #   b. 让 R2025009 借满额度（用于测"超过借阅上限"）
+    full_user = users[8]
+
+    while full_user.current_borrow < full_user.max_borrow:
+        add_loan(pool.pop(), full_user, now - timedelta(days=5))
+
     db.add_all(loans)
     db.commit()
 
@@ -340,6 +356,7 @@ def main():
         print("借阅记录:", len(loans), "条（其中逾期未还", OVERDUE_LOAN_COUNT, "条）")
         print("《三体》:", santi.total_copies, "册 /", santi.available_copies, "册在架")
         print("数据灌好了")
+        print("特殊状态：B009《算法导论》全部借出、R2025009 额度已满（供评测用例使用）")
     finally:
         db.close()
 

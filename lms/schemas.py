@@ -37,6 +37,7 @@ class LoanOut(BaseModel):
     loan_id: str
     user_id: str
     book_id: str
+    book_title: str = ""      #借阅列表里带上书名（由 books 表 join 得到），方便展示
     borrowed_at: datetime
     due_at: datetime
     returned_at: datetime | None
@@ -99,3 +100,23 @@ class BookAvailabilityOut(BaseModel):
     available_copies: int
     on_shelf_locations: str
     next_return_date: datetime | None
+
+# ===== 登录相关 =====
+
+class RegisterIn(BaseModel):
+    user_id: str = Field(description="借书证号，例如 R2025051")
+    name: str = Field(description="姓名")
+    phone: str = Field(default="", description="联系电话（可不填）")
+    password: str = Field(description="密码，至少 6 位")
+    #演示用：允许注册时选等级。真实系统里等级应该由图书馆授予，不能自己选（否则人人都选"教师"借 15 本）
+    level: str = Field(default="普通", description="读者等级：普通 / 学生 / 教师")
+
+
+class LoginIn(BaseModel):
+    user_id: str = Field(description="借书证号")
+    password: str = Field(description="密码")
+
+
+class TokenOut(BaseModel):
+    token: str = Field(description="登录令牌；后续请求放在请求头 Authorization: Bearer <token>")
+    user: UserOut
