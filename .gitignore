@@ -4,4 +4,6 @@ __pycache__/
 *.pyc
 .vscode/
 *.db
+*.sqlite 
 data/chroma_db/
+data/traces/
