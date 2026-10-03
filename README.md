@@ -1,5 +1,7 @@
 # 图书馆借阅助手（Library Agent）
 
+GitHub：https://github.com/Eason-store/AI-library-agent
+
 在多轮对话里完成 **查馆藏 → 判断可借 → 借书 / 续借 / 归还 / 预约** 完整闭环的图书馆助手。
 
 大模型负责理解意图和把结果说成人话；**业务规则和数据都在服务端**；
